@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="..\..\FNA\FNA.Core.csproj" />
+    <ProjectReference Include="..\deps\FNA\FNA.Core.csproj" />
   </ItemGroup>
 
   <PropertyGroup>
@@ -10,5 +10,17 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
+
+  <ItemGroup>
+    <FnaBinaries Include="..\deps\fna-libs\lib64\*"/>
+  </ItemGroup>
+
+  <Target Name="CopyFnaBinaries" AfterTargets="Build">
+    <Message Text="Executing CopyFnaBinaries task" Importance="High" />
+
+    <Copy SourceFiles="@(FnaBinaries)" DestinationFolder="$(OutDir)" />
+
+    <Message Text="Copied build files" Importance="High" />
+  </Target>
 
 </Project>
