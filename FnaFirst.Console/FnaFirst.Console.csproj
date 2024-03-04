@@ -12,7 +12,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <FnaBinaries Include="..\deps\fna-libs\lib64\*"/>
+    <FnaBinaries Include="..\deps\fna-binaries\lib64\*"/>
   </ItemGroup>
 
   <Target Name="CopyFnaBinaries" AfterTargets="Build">

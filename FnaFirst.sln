@@ -5,7 +5,7 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FnaFirst.Console", "FnaFirst.Console\FnaFirst.Console.csproj", "{F6E0A94B-DC6D-4DB4-9813-144260FFF938}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FNA.Core", "..\FNA\FNA.Core.csproj", "{0147146E-A0AF-446F-A501-7E6321A9A374}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FNA.Core", "deps\FNA\FNA.Core.csproj", "{0147146E-A0AF-446F-A501-7E6321A9A374}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
