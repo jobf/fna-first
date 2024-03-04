@@ -482,3 +482,9 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+deps/fna-binaries/lib64/
+deps/fna-binaries/libaarch64
+deps/fna-binaries/osx
+deps/fna-binaries/vulkan
+deps/fna-binaries/README.txt
+deps/fna-binaries/fnalibs.tar.bz2
