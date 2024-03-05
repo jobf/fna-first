@@ -36,8 +36,7 @@ namespace Core
         private IntPtr? _fontTextureId;
 
         // Input
-        private int _scrollWheelValue;
-        private int _horizontalScrollWheelValue;
+        private int scrollWheelValue;
         private readonly float WHEEL_DELTA = 120;
         private Keys[] _allKeys = Enum.GetValues<Keys>();
 
@@ -203,11 +202,10 @@ namespace Core
             io.AddMouseButtonEvent(3, mouse.XButton1 == ButtonState.Pressed);
             io.AddMouseButtonEvent(4, mouse.XButton2 == ButtonState.Pressed);
 
-            // io.AddMouseWheelEvent(
-            //     (mouse.HorizontalScrollWheelValue - _horizontalScrollWheelValue) / WHEEL_DELTA,
-            //     (mouse.ScrollWheelValue - _scrollWheelValue) / WHEEL_DELTA);
-            // _scrollWheelValue = mouse.ScrollWheelValue;
-            // _horizontalScrollWheelValue = mouse.HorizontalScrollWheelValue;
+            io.AddMouseWheelEvent(
+                0,
+                (mouse.ScrollWheelValue - scrollWheelValue) / WHEEL_DELTA);
+            scrollWheelValue = mouse.ScrollWheelValue;
 
             foreach (var key in _allKeys)
             {
