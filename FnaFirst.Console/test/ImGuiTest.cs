@@ -1,5 +1,5 @@
 
-using Core;
+using core;
 using ImGuiNET;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
