@@ -42,6 +42,7 @@ class Main : Game
 	private Texture2D cannon_texture;
 	private Texture2D rocket_texture;
 	private Texture2D smoke_texture;
+	private Texture2D ground_texture;
 	private SpriteBatch sprite_batch;
 	private int screen_width;
 	private int screen_height;
@@ -79,6 +80,7 @@ class Main : Game
 		cannon_texture = Content.Load<Texture2D>("cannon.png");
 		rocket_texture = Content.Load<Texture2D>("rocket.png");
 		smoke_texture = Content.Load<Texture2D>("smoke.png");
+		ground_texture = Content.Load<Texture2D>("ground");
 
 		sprite_batch = new SpriteBatch(GraphicsDevice);
 
@@ -92,6 +94,26 @@ class Main : Game
 		set_up_players();
 		flatten_terrain_beneath_players();
 		create_foreground();
+	}
+
+	private Color[,] TextureTo2DArray(Texture2D texture)
+	{
+
+		// extract color data (pixels) from a Texture2D, to a flat array
+		Color[] colors = new Color[texture.Width * texture.Height];
+		texture.GetData(colors);
+
+		// put colors into a 2D array
+		Color[,] color_grid = new Color[texture.Width, texture.Height];
+		for (int x = 0; x < texture.Width; x++)
+		{
+			for (int y = 0; y < texture.Height; y++)
+			{
+				color_grid[x, y] = colors[x + y * texture.Width];
+			}
+		}
+
+		return color_grid;
 	}
 
 	void draw_scenery()
@@ -267,6 +289,7 @@ class Main : Game
 
 	private void create_foreground()
 	{
+		Color[,] ground_color_grid = TextureTo2DArray(ground_texture);
 		var foreground_colors = new Color[screen_width * screen_height];
 
 		for (int x = 0; x < screen_width; x++)
@@ -275,7 +298,10 @@ class Main : Game
 			{
 				if (y > terrain_contour[x])
 				{
-					foreground_colors[x + y * screen_width] = Color.Green;
+					// use modulo to wrap texture lookup positions within ground texture boundaries
+					var lookup_x = x % ground_texture.Width;
+					var lookup_y = y % ground_texture.Height;
+					foreground_colors[x + y * screen_width] = ground_color_grid[lookup_x, lookup_y];
 				}
 				else
 				{
