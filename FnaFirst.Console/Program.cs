@@ -41,6 +41,7 @@ class Main : Game
 	private Texture2D carriage_texture;
 	private Texture2D cannon_texture;
 	private Texture2D rocket_texture;
+	private Texture2D smoke_texture;
 	private SpriteBatch sprite_batch;
 	private int screen_width;
 	private int screen_height;
@@ -67,6 +68,8 @@ class Main : Game
 	private Vector2 rocket_direction;
 	private float rocket_angle;
 	private float rocket_scaling = 0.1f;
+	private List<Vector2> smoke_list = new List<Vector2>();
+	private Random randomizer = new Random();
 
 	protected override void LoadContent()
 	{
@@ -75,6 +78,7 @@ class Main : Game
 		carriage_texture = Content.Load<Texture2D>("carriage.png");
 		cannon_texture = Content.Load<Texture2D>("cannon.png");
 		rocket_texture = Content.Load<Texture2D>("rocket.png");
+		smoke_texture = Content.Load<Texture2D>("smoke.png");
 
 		sprite_batch = new SpriteBatch(GraphicsDevice);
 
@@ -125,6 +129,13 @@ class Main : Game
 		}
 	}
 
+	private void draw_smoke()
+	{
+		for (int i = 0; i < smoke_list.Count; i++)
+		{
+			sprite_batch.Draw(smoke_texture, smoke_list[i], null, Color.White, 0, new Vector2(40, 35), 0.2f, SpriteEffects.None, 1);
+		}
+	}
 	void process_keyboard()
 	{
 		KeyboardState keybState = Keyboard.GetState();
@@ -233,6 +244,15 @@ class Main : Game
 			rocket_direction += gravity / 10.0f;
 			rocket_position += rocket_direction;
 			rocket_angle = (float)Math.Atan2(rocket_direction.X, -rocket_direction.Y);
+
+			for (int i = 0; i < 5; i++)
+			{
+				Vector2 smokePos = rocket_position;
+				smokePos.X += randomizer.Next(10) - 5;
+				smokePos.Y += randomizer.Next(10) - 5;
+				smoke_list.Add(smokePos);
+			}
+
 		}
 	}
 
@@ -251,6 +271,7 @@ class Main : Game
 		draw_scenery();
 		draw_players();
 		draw_rocket();
+		draw_smoke();
 		sprite_batch.End();
 
 		base.Draw(gameTime);
