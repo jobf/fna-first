@@ -90,6 +90,7 @@ class Main : Game
 
 		generate_terrain_contour();
 		set_up_players();
+		flatten_terrain_beneath_players();
 		create_foreground();
 	}
 
@@ -247,6 +248,20 @@ class Main : Game
 			height += peak_height / rand3 * Math.Sin((float)x / flatness * rand3 + rand3);
 			height += offset;
 			terrain_contour[x] = (int)height;
+		}
+	}
+
+	private void flatten_terrain_beneath_players()
+	{
+		foreach (var player in players)
+		{
+			if (player.IsAlive)
+			{
+				for (int x = 0; x < 40; x++)
+				{
+					terrain_contour[(int)player.Position.X + x] = terrain_contour[(int)player.Position.X];
+				}
+			}
 		}
 	}
 
