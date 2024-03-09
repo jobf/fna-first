@@ -87,9 +87,9 @@ class Main : Game
 
 
 		player_scaling = 40.0f / (float)carriage_texture.Width;
-		set_up_players();
 
 		generate_terrain_contour();
+		set_up_players();
 		create_foreground();
 	}
 
@@ -218,12 +218,14 @@ class Main : Game
 			players[i].Color = player_colors[i];
 			players[i].Angle = MathHelper.ToRadians(90);
 			players[i].Power = 100;
+			int x = screen_width / (number_of_players + 1) * (i + 1);
+			players[i].Position = new Vector2
+			{
+				X = x,
+				Y = terrain_contour[x]
+			};
 		}
 
-		players[0].Position = new Vector2(100, 193);
-		players[1].Position = new Vector2(200, 212);
-		players[2].Position = new Vector2(300, 361);
-		players[3].Position = new Vector2(400, 164);
 	}
 
 	void generate_terrain_contour()
