@@ -43,6 +43,7 @@ class Main : Game
 	private SpriteBatch sprite_batch;
 	private int screen_width;
 	private int screen_height;
+	private float player_scaling;
 	private PlayerData[] players;
 	private int number_of_players = 4;
 	private Color[] player_colors = new Color[10]
@@ -72,6 +73,7 @@ class Main : Game
 		screen_height = GraphicsDevice.PresentationParameters.BackBufferHeight;
 
 
+		player_scaling = 40.0f / (float)carriage_texture.Width;
 		set_up_players();
 	}
 
@@ -88,7 +90,15 @@ class Main : Game
 		{
 			if (players[i].IsAlive)
 			{
-				sprite_batch.Draw(carriage_texture, players[i].Position, Color.White);
+				// by setting source rect as null we say that all the image should be used
+				Nullable<Rectangle> source_rect = null;
+				var tint = Color.White;
+				var rotate = 0;
+				var origin = new Vector2(0, carriage_texture.Height);
+				var scale = player_scaling;
+				var effect = SpriteEffects.None;
+				var layer = 0;
+				sprite_batch.Draw(carriage_texture, players[i].Position, source_rect, tint, rotate, origin, scale, effect, layer);
 			}
 		}
 	}
