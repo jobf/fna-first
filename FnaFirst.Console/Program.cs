@@ -90,6 +90,10 @@ class Main : Game
 		{
 			if (players[i].IsAlive)
 			{
+				var x_pos = (int)players[i].Position.X;
+				var y_pos = (int)players[i].Position.Y;
+				var cannon_origin = new Vector2(11, 50);
+
 				// by setting source rect as null we say that all the image should be used
 				Nullable<Rectangle> source_rect = null;
 				var tint = players[i].Color;
@@ -99,6 +103,7 @@ class Main : Game
 				var effect = SpriteEffects.None;
 				var layer = 0;
 				sprite_batch.Draw(carriage_texture, players[i].Position, source_rect, tint, rotate, origin, scale, effect, layer);
+				sprite_batch.Draw(cannon_texture, new Vector2(x_pos + 20, y_pos - 10), source_rect, tint, players[i].Angle, cannon_origin, player_scaling, effect, layer);
 			}
 		}
 	}
