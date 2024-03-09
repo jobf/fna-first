@@ -20,7 +20,6 @@ static class Program
 				IsFullScreen = false
 			};
 
-			// graphics.ApplyChanges();
 			game.Run();
 		}
 	}
@@ -29,18 +28,16 @@ static class Program
 class Main : Game
 {
 	private Texture2D background_texture;
+	private Texture2D foreground_texture;
 	private SpriteBatch sprite_batch;
 	private int screen_width;
 	private int screen_height;
 
-	// private GraphicsDeviceManager graphics;
-
 	protected override void LoadContent()
 	{
-		// base.LoadContent();
-		// device = GraphicsDevice;
-
 		background_texture = Content.Load<Texture2D>("background.jpg");
+		foreground_texture = Content.Load<Texture2D>("foreground.png");
+
 		sprite_batch = new SpriteBatch(GraphicsDevice);
 
 		screen_width = GraphicsDevice.PresentationParameters.BackBufferWidth;
@@ -51,11 +48,11 @@ class Main : Game
 	{
 		Rectangle screenRectangle = new Rectangle(0, 0, screen_width, screen_height);
 		sprite_batch.Draw(background_texture, screenRectangle, Color.White);
+		sprite_batch.Draw(foreground_texture, screenRectangle, Color.White);
 	}
 
 	public Main()
 	{
-		// graphics = new GraphicsDeviceManager(this);
 		Content.RootDirectory = "Content";
 	}
 
