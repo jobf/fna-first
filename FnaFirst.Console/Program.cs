@@ -113,6 +113,7 @@ class Main : Game
 	{
 		KeyboardState keybState = Keyboard.GetState();
 
+		// rotate cannons anti-clockwise or clockwise 
 		if (keybState.IsKeyDown(Keys.Left))
 		{
 			players[current_player].Angle -= 0.01f;
@@ -120,6 +121,16 @@ class Main : Game
 		if (keybState.IsKeyDown(Keys.Right))
 		{
 			players[current_player].Angle += 0.01f;
+		}
+
+		// prevent rotation from hitting floor
+		if (players[current_player].Angle > MathHelper.PiOver2)
+		{
+			players[current_player].Angle = -MathHelper.PiOver2;
+		}
+		if (players[current_player].Angle < -MathHelper.PiOver2)
+		{
+			players[current_player].Angle = MathHelper.PiOver2;
 		}
 	}
 
