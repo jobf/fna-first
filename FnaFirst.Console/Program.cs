@@ -40,6 +40,7 @@ class Main : Game
 	private Texture2D foreground_texture;
 	private Texture2D carriage_texture;
 	private Texture2D cannon_texture;
+	private Texture2D rocket_texture;
 	private SpriteBatch sprite_batch;
 	private int screen_width;
 	private int screen_height;
@@ -61,12 +62,19 @@ class Main : Game
 		  Color.Turquoise
 	};
 
+	private bool rocket_flying = false;
+	private Vector2 rocket_position;
+	private Vector2 rocket_direction;
+	private float rocket_angle;
+	private float rocket_scaling = 0.1f;
+
 	protected override void LoadContent()
 	{
 		background_texture = Content.Load<Texture2D>("background.jpg");
 		foreground_texture = Content.Load<Texture2D>("foreground.png");
 		carriage_texture = Content.Load<Texture2D>("carriage.png");
 		cannon_texture = Content.Load<Texture2D>("cannon.png");
+		rocket_texture = Content.Load<Texture2D>("rocket.png");
 
 		sprite_batch = new SpriteBatch(GraphicsDevice);
 
@@ -75,7 +83,7 @@ class Main : Game
 
 
 		player_scaling = 40.0f / (float)carriage_texture.Width;
-		set_upplayers();
+		set_up_players();
 	}
 
 	void draw_scenery()
@@ -85,7 +93,7 @@ class Main : Game
 		sprite_batch.Draw(foreground_texture, screenRectangle, Color.White);
 	}
 
-	void drawplayers()
+	void draw_players()
 	{
 		for (int i = 0; i < players.Length; i++)
 		{
@@ -108,6 +116,14 @@ class Main : Game
 			}
 		}
 	}
+
+	 void draw_rocket()
+    {
+        if (rocket_flying)
+        {
+            sprite_batch.Draw(rocket_texture, rocket_position, null, players[current_player].Color, rocket_angle, new Vector2(42, 240), rocket_scaling, SpriteEffects.None, 1);
+        }
+    }
 
 	void process_keyboard()
 	{
@@ -159,9 +175,27 @@ class Main : Game
 		{
 			players[current_player].Power = 0;
 		}
+
+		// launch rocket
+		if (keybState.IsKeyDown(Keys.Enter) || keybState.IsKeyDown(Keys.Space))
+		{
+			rocket_flying = true;
+			rocket_position = players[current_player].Position;
+			rocket_position.X += 20;
+			rocket_position.Y -= 10;
+			rocket_angle = players[current_player].Angle;
+
+			// define the Up vector which is along the negative Y axis
+			var up = new Vector2(0, -1);
+
+			// rotate the Up vector with rotation matrix
+			var rot_matrix = Matrix.CreateRotationZ(rocket_angle);
+			rocket_direction = Vector2.Transform(up, rot_matrix);
+			rocket_direction *= players[current_player].Power / 50.0f;
+		}
 	}
 
-	void set_upplayers()
+	void set_up_players()
 	{
 		players = new PlayerData[number_of_players];
 		for (int i = 0; i < number_of_players; i++)
@@ -202,7 +236,8 @@ class Main : Game
 
 		sprite_batch.Begin();
 		draw_scenery();
-		drawplayers();
+		draw_players();
+		draw_rocket();
 		sprite_batch.End();
 
 		base.Draw(gameTime);
