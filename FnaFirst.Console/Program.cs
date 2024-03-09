@@ -75,7 +75,7 @@ class Main : Game
 
 
 		player_scaling = 40.0f / (float)carriage_texture.Width;
-		set_up_players();
+		set_upplayers();
 	}
 
 	void draw_scenery()
@@ -85,7 +85,7 @@ class Main : Game
 		sprite_batch.Draw(foreground_texture, screenRectangle, Color.White);
 	}
 
-	void draw_players()
+	void drawplayers()
 	{
 		for (int i = 0; i < players.Length; i++)
 		{
@@ -132,9 +132,36 @@ class Main : Game
 		{
 			players[current_player].Angle = MathHelper.PiOver2;
 		}
+
+		// set power
+		if (keybState.IsKeyDown(Keys.Down))
+		{
+			players[current_player].Power -= 1;
+		}
+		if (keybState.IsKeyDown(Keys.Up))
+		{
+			players[current_player].Power += 1;
+		}
+		if (keybState.IsKeyDown(Keys.PageDown))
+		{
+			players[current_player].Power -= 20;
+		}
+		if (keybState.IsKeyDown(Keys.PageUp))
+		{
+			players[current_player].Power += 20;
+		}
+
+		if (players[current_player].Power > 1000)
+		{
+			players[current_player].Power = 1000;
+		}
+		if (players[current_player].Power < 0)
+		{
+			players[current_player].Power = 0;
+		}
 	}
 
-	void set_up_players()
+	void set_upplayers()
 	{
 		players = new PlayerData[number_of_players];
 		for (int i = 0; i < number_of_players; i++)
@@ -175,7 +202,7 @@ class Main : Game
 
 		sprite_batch.Begin();
 		draw_scenery();
-		draw_players();
+		drawplayers();
 		sprite_batch.End();
 
 		base.Draw(gameTime);
