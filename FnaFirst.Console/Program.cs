@@ -3,7 +3,7 @@ using Core;
 using ImGuiNET;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-
+using Microsoft.Xna.Framework.Input;
 using Num = System.Numerics;
 
 static class Program
@@ -46,6 +46,7 @@ class Main : Game
 	private float player_scaling;
 	private PlayerData[] players;
 	private int number_of_players = 4;
+	private int current_player = 0;
 	private Color[] player_colors = new Color[10]
 	{
 		  Color.Red,
@@ -108,6 +109,20 @@ class Main : Game
 		}
 	}
 
+	void process_keyboard()
+	{
+		KeyboardState keybState = Keyboard.GetState();
+
+		if (keybState.IsKeyDown(Keys.Left))
+		{
+			players[current_player].Angle -= 0.01f;
+		}
+		if (keybState.IsKeyDown(Keys.Right))
+		{
+			players[current_player].Angle += 0.01f;
+		}
+	}
+
 	void set_up_players()
 	{
 		players = new PlayerData[number_of_players];
@@ -137,6 +152,11 @@ class Main : Game
 		base.Initialize();
 	}
 
+	protected override void Update(GameTime gameTime)
+	{
+		process_keyboard();
+		base.Update(gameTime);
+	}
 
 	protected override void Draw(GameTime gameTime)
 	{
