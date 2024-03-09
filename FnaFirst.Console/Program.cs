@@ -230,12 +230,20 @@ class Main : Game
 	{
 		terrain_contour = new int[screen_width];
 
+		double rand1 = randomizer.NextDouble() + 1;
+		double rand2 = randomizer.NextDouble() + 2;
+		double rand3 = randomizer.NextDouble() + 3;
+
 		float offset = screen_height / 2;
 		float peak_height = 100;
-		float flatness = 50;
+		float flatness = 70;
+
 		for (int x = 0; x < screen_width; x++)
 		{
-			double height = peak_height * Math.Sin((float)x / flatness) + offset;
+			double height = peak_height / rand1 * Math.Sin((float)x / flatness * rand1 + rand1);
+			height += peak_height / rand2 * Math.Sin((float)x / flatness * rand2 + rand2);
+			height += peak_height / rand3 * Math.Sin((float)x / flatness * rand3 + rand3);
+			height += offset;
 			terrain_contour[x] = (int)height;
 		}
 	}
