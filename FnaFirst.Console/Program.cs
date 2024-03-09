@@ -92,7 +92,7 @@ class Main : Game
 			{
 				// by setting source rect as null we say that all the image should be used
 				Nullable<Rectangle> source_rect = null;
-				var tint = Color.White;
+				var tint = players[i].Color;
 				var rotate = 0;
 				var origin = new Vector2(0, carriage_texture.Height);
 				var scale = player_scaling;
