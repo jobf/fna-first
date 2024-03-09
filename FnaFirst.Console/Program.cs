@@ -70,11 +70,11 @@ class Main : Game
 	private float rocket_scaling = 0.1f;
 	private List<Vector2> smoke_list = new List<Vector2>();
 	private Random randomizer = new Random();
+	private int[] terrain_contour;
 
 	protected override void LoadContent()
 	{
 		background_texture = Content.Load<Texture2D>("background.jpg");
-		foreground_texture = Content.Load<Texture2D>("foreground.png");
 		carriage_texture = Content.Load<Texture2D>("carriage.png");
 		cannon_texture = Content.Load<Texture2D>("cannon.png");
 		rocket_texture = Content.Load<Texture2D>("rocket.png");
@@ -88,6 +88,9 @@ class Main : Game
 
 		player_scaling = 40.0f / (float)carriage_texture.Width;
 		set_up_players();
+
+		generate_terrain_contour();
+		create_foreground();
 	}
 
 	void draw_scenery()
@@ -221,6 +224,38 @@ class Main : Game
 		players[1].Position = new Vector2(200, 212);
 		players[2].Position = new Vector2(300, 361);
 		players[3].Position = new Vector2(400, 164);
+	}
+
+	void generate_terrain_contour()
+	{
+		terrain_contour = new int[screen_width];
+
+		for (int x = 0; x < screen_width; x++)
+		{
+			terrain_contour[x] = screen_height / 2;
+		}
+	}
+	private void create_foreground()
+	{
+		var foreground_colors = new Color[screen_width * screen_height];
+
+		for (int x = 0; x < screen_width; x++)
+		{
+			for (int y = 0; y < screen_height; y++)
+			{
+				if (y > terrain_contour[x])
+				{
+					foreground_colors[x + y * screen_width] = Color.Green;
+				}
+				else
+				{
+					foreground_colors[x + y * screen_width] = Color.Transparent;
+				}
+			}
+		}
+
+		foreground_texture = new Texture2D(GraphicsDevice, screen_width, screen_height, false, SurfaceFormat.Color);
+		foreground_texture.SetData(foreground_colors);
 	}
 
 	public Main()
