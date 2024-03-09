@@ -252,7 +252,11 @@ class Main : Game
 				smokePos.Y += randomizer.Next(10) - 5;
 				smoke_list.Add(smokePos);
 			}
-
+			if (rocket_position.Y > 600)
+			{
+				rocket_flying = false;
+				smoke_list = new List<Vector2>();
+			}
 		}
 	}
 
