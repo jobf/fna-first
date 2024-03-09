@@ -25,23 +25,54 @@ static class Program
 	}
 }
 
+public struct PlayerData
+{
+	public Vector2 Position;
+	public bool IsAlive;
+	public Color Color;
+	public float Angle;
+	public float Power;
+}
+
 class Main : Game
 {
 	private Texture2D background_texture;
 	private Texture2D foreground_texture;
+	private Texture2D carriage_texture;
+	private Texture2D cannon_texture;
 	private SpriteBatch sprite_batch;
 	private int screen_width;
 	private int screen_height;
+	private PlayerData[] players;
+	private int number_of_players = 4;
+	private Color[] player_colors = new Color[10]
+	{
+		  Color.Red,
+		  Color.Green,
+		  Color.Blue,
+		  Color.Purple,
+		  Color.Orange,
+		  Color.Indigo,
+		  Color.Yellow,
+		  Color.SaddleBrown,
+		  Color.Tomato,
+		  Color.Turquoise
+	};
 
 	protected override void LoadContent()
 	{
 		background_texture = Content.Load<Texture2D>("background.jpg");
 		foreground_texture = Content.Load<Texture2D>("foreground.png");
+		carriage_texture = Content.Load<Texture2D>("carriage.png");
+		cannon_texture = Content.Load<Texture2D>("cannon.png");
 
 		sprite_batch = new SpriteBatch(GraphicsDevice);
 
 		screen_width = GraphicsDevice.PresentationParameters.BackBufferWidth;
 		screen_height = GraphicsDevice.PresentationParameters.BackBufferHeight;
+
+
+		set_up_players();
 	}
 
 	void draw_scenery()
@@ -49,6 +80,34 @@ class Main : Game
 		Rectangle screenRectangle = new Rectangle(0, 0, screen_width, screen_height);
 		sprite_batch.Draw(background_texture, screenRectangle, Color.White);
 		sprite_batch.Draw(foreground_texture, screenRectangle, Color.White);
+	}
+
+	void draw_players()
+	{
+		for (int i = 0; i < players.Length; i++)
+		{
+			if (players[i].IsAlive)
+			{
+				sprite_batch.Draw(carriage_texture, players[i].Position, Color.White);
+			}
+		}
+	}
+
+	void set_up_players()
+	{
+		players = new PlayerData[number_of_players];
+		for (int i = 0; i < number_of_players; i++)
+		{
+			players[i].IsAlive = true;
+			players[i].Color = player_colors[i];
+			players[i].Angle = MathHelper.ToRadians(90);
+			players[i].Power = 100;
+		}
+
+		players[0].Position = new Vector2(100, 193);
+		players[1].Position = new Vector2(200, 212);
+		players[2].Position = new Vector2(300, 361);
+		players[3].Position = new Vector2(400, 164);
 	}
 
 	public Main()
@@ -70,6 +129,7 @@ class Main : Game
 
 		sprite_batch.Begin();
 		draw_scenery();
+		draw_players();
 		sprite_batch.End();
 
 		base.Draw(gameTime);
