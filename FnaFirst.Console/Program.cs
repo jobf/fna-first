@@ -230,11 +230,16 @@ class Main : Game
 	{
 		terrain_contour = new int[screen_width];
 
+		float offset = screen_height / 2;
+		float peak_height = 100;
+		float flatness = 50;
 		for (int x = 0; x < screen_width; x++)
 		{
-			terrain_contour[x] = screen_height / 2;
+			double height = peak_height * Math.Sin((float)x / flatness) + offset;
+			terrain_contour[x] = (int)height;
 		}
 	}
+
 	private void create_foreground()
 	{
 		var foreground_colors = new Color[screen_width * screen_height];
