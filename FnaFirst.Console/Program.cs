@@ -314,6 +314,7 @@ class Main : Game
 		foreground_texture.SetData(foreground_colors);
 	}
 
+
 	public Main()
 	{
 		Content.RootDirectory = "Content";
@@ -349,6 +350,42 @@ class Main : Game
 				smoke_list = new List<Vector2>();
 			}
 		}
+	}
+	private Vector2 textures_collide(Color[,] tex_a, Matrix matrix_a, Color[,] tex_b, Matrix matrix_b)
+	{
+		var matrix_a_to_b = matrix_a * Matrix.Invert(matrix_b);
+		int width_a = tex_a.GetLength(0);
+		int height_a = tex_a.GetLength(1);
+		int width_b = tex_b.GetLength(0);
+		int height_b = tex_b.GetLength(1);
+
+		for (int x_a = 0; x_a < width_a; x_a++)
+		{
+			for (int y_a = 0; y_a < height_a; y_a++)
+			{
+				Vector2 pos_a = new Vector2(x_a, y_a);
+				Vector2 pos_b = Vector2.Transform(pos_a, matrix_a_to_b);
+
+				int x_b = (int)pos_b.X;
+				int y_b = (int)pos_b.Y;
+
+				if ((x_b >= 0) && (x_b < width_b))
+				{
+					if ((y_b >= 0) && (y_b < height_b))
+					{
+						if (tex_a[x_a, y_a].A > 0)
+						{
+							if (tex_b[x_b, y_b].A > 0)
+							{
+								return Vector2.Transform(pos_a, matrix_a);
+							}
+						}
+					}
+				}
+			}
+		}
+
+		return new Vector2(-1, -1);
 	}
 
 	protected override void Update(GameTime gameTime)
