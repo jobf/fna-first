@@ -117,13 +117,13 @@ class Main : Game
 		}
 	}
 
-	 void draw_rocket()
-    {
-        if (rocket_flying)
-        {
-            sprite_batch.Draw(rocket_texture, rocket_position, null, players[current_player].Color, rocket_angle, new Vector2(42, 240), rocket_scaling, SpriteEffects.None, 1);
-        }
-    }
+	void draw_rocket()
+	{
+		if (rocket_flying)
+		{
+			sprite_batch.Draw(rocket_texture, rocket_position, null, players[current_player].Color, rocket_angle, new Vector2(42, 240), rocket_scaling, SpriteEffects.None, 1);
+		}
+	}
 
 	void process_keyboard()
 	{
@@ -224,9 +224,22 @@ class Main : Game
 		base.Initialize();
 	}
 
+	private void update_rocket()
+	{
+		if (rocket_flying)
+		{
+
+			Vector2 gravity = new Vector2(0, 1);
+			rocket_direction += gravity / 10.0f;
+			rocket_position += rocket_direction;
+			rocket_angle = (float)Math.Atan2(rocket_direction.X, -rocket_direction.Y);
+		}
+	}
+
 	protected override void Update(GameTime gameTime)
 	{
 		process_keyboard();
+		update_rocket();
 		base.Update(gameTime);
 	}
 
