@@ -63,6 +63,10 @@ class Main : Game
 		  Color.Tomato,
 		  Color.Turquoise
 	};
+	private Color[,] rocket_color_grid;
+	private Color[,] _foregroundColorArray;
+	private Color[,] carriage_color_grid;
+	private Color[,] cannon_color_grid;
 
 	private bool rocket_flying = false;
 	private Vector2 rocket_position;
@@ -91,9 +95,13 @@ class Main : Game
 		player_scaling = 40.0f / (float)carriage_texture.Width;
 
 		generate_terrain_contour();
-		set_up_players();
-		flatten_terrain_beneath_players();
+		set_upplayers();
+		flatten_terrain_beneathplayers();
 		create_foreground();
+
+		rocket_color_grid = TextureTo2DArray(rocket_texture);
+		carriage_color_grid = TextureTo2DArray(carriage_texture);
+		cannon_color_grid = TextureTo2DArray(cannon_texture);
 	}
 
 	private Color[,] TextureTo2DArray(Texture2D texture)
@@ -232,7 +240,7 @@ class Main : Game
 		}
 	}
 
-	void set_up_players()
+	void set_upplayers()
 	{
 		players = new PlayerData[number_of_players];
 		for (int i = 0; i < number_of_players; i++)
@@ -273,7 +281,7 @@ class Main : Game
 		}
 	}
 
-	private void flatten_terrain_beneath_players()
+	private void flatten_terrain_beneathplayers()
 	{
 		foreach (var player in players)
 		{
@@ -312,6 +320,7 @@ class Main : Game
 
 		foreground_texture = new Texture2D(GraphicsDevice, screen_width, screen_height, false, SurfaceFormat.Color);
 		foreground_texture.SetData(foreground_colors);
+		_foregroundColorArray = TextureTo2DArray(foreground_texture);
 	}
 
 
@@ -329,27 +338,24 @@ class Main : Game
 
 	private void update_rocket()
 	{
-		if (rocket_flying)
+		Vector2 gravity = new Vector2(0, 1);
+		rocket_direction += gravity / 10.0f;
+		rocket_position += rocket_direction;
+		rocket_angle = (float)Math.Atan2(rocket_direction.X, -rocket_direction.Y);
+
+		for (int i = 0; i < 5; i++)
 		{
-
-			Vector2 gravity = new Vector2(0, 1);
-			rocket_direction += gravity / 10.0f;
-			rocket_position += rocket_direction;
-			rocket_angle = (float)Math.Atan2(rocket_direction.X, -rocket_direction.Y);
-
-			for (int i = 0; i < 5; i++)
-			{
-				Vector2 smokePos = rocket_position;
-				smokePos.X += randomizer.Next(10) - 5;
-				smokePos.Y += randomizer.Next(10) - 5;
-				smoke_list.Add(smokePos);
-			}
-			if (rocket_position.Y > 600)
-			{
-				rocket_flying = false;
-				smoke_list = new List<Vector2>();
-			}
+			Vector2 smokePos = rocket_position;
+			smokePos.X += randomizer.Next(10) - 5;
+			smokePos.Y += randomizer.Next(10) - 5;
+			smoke_list.Add(smokePos);
 		}
+		if (rocket_position.Y > 600)
+		{
+			rocket_flying = false;
+			smoke_list = new List<Vector2>();
+		}
+
 	}
 	private Vector2 textures_collide(Color[,] tex_a, Matrix matrix_a, Color[,] tex_b, Matrix matrix_b)
 	{
@@ -388,12 +394,105 @@ class Main : Game
 		return new Vector2(-1, -1);
 	}
 
+	private Vector2 check_terrain_collision()
+	{
+		Matrix rocketMat = Matrix.CreateTranslation(-42, -240, 0) *
+								 Matrix.CreateRotationZ(rocket_angle) *
+								 Matrix.CreateScale(rocket_scaling) *
+								 Matrix.CreateTranslation(rocket_position.X, rocket_position.Y, 0);
+		Matrix terrainMat = Matrix.Identity;
+		Vector2 terrainCollisionPoint = textures_collide(rocket_color_grid, rocketMat, _foregroundColorArray, terrainMat);
+		return terrainCollisionPoint;
+	}
+
+	private Vector2 check_players_collision()
+	{
+		Matrix rocketMat = Matrix.CreateTranslation(-42, -240, 0) *
+								  Matrix.CreateRotationZ(rocket_angle) *
+								  Matrix.CreateScale(rocket_scaling) *
+								  Matrix.CreateTranslation(rocket_position.X, rocket_position.Y, 0);
+
+		for (int i = 0; i < number_of_players; i++)
+		{
+			PlayerData player = players[i];
+			if (player.IsAlive)
+			{
+				if (i != current_player)
+				{
+					int xPos = (int)player.Position.X;
+					int yPos = (int)player.Position.Y;
+
+					Matrix carriageMat = Matrix.CreateTranslation(0, -carriage_texture.Height, 0) *
+													Matrix.CreateScale(player_scaling) *
+													Matrix.CreateTranslation(xPos, yPos, 0);
+					Vector2 carriageCollisionPoint = textures_collide(carriage_color_grid, carriageMat, rocket_color_grid, rocketMat);
+				}
+			}
+		}
+		return new Vector2(-1, -1);
+	}
+
+	private bool check_out_of_screen()
+	{
+		bool rocketOutOfScreen = rocket_position.Y > screen_height;
+		rocketOutOfScreen |= rocket_position.X < 0;
+		rocketOutOfScreen |= rocket_position.X > screen_width;
+
+		return rocketOutOfScreen;
+	}
+
+	private void check_collisions(GameTime gameTime)
+	{
+		Vector2 terrain_collision_point = check_terrain_collision();
+		Vector2 player_collision_point = check_players_collision();
+		bool rocket_out_of_screen = check_out_of_screen();
+
+		if (player_collision_point.X > -1)
+		{
+			rocket_flying = false;
+
+			smoke_list = new List<Vector2>();
+			next_player();
+		}
+
+		if (terrain_collision_point.X > -1)
+		{
+			rocket_flying = false;
+
+			smoke_list = new List<Vector2>();
+			next_player();
+		}
+
+		if (rocket_out_of_screen)
+		{
+			rocket_flying = false;
+
+			smoke_list = new List<Vector2>();
+			next_player();
+		}
+	}
+
+	void next_player()
+	{
+		current_player = current_player + 1;
+		current_player = current_player % number_of_players;
+		while (!players[current_player].IsAlive)
+		{
+			current_player = ++current_player % number_of_players;
+		}
+	}
+
 	protected override void Update(GameTime gameTime)
 	{
 		process_keyboard();
-		update_rocket();
+		if (rocket_flying)
+		{
+			update_rocket();
+			check_collisions(gameTime);
+		}
 		base.Update(gameTime);
 	}
+
 
 	protected override void Draw(GameTime gameTime)
 	{
