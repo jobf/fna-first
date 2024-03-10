@@ -95,16 +95,16 @@ class Main : Game
 		player_scaling = 40.0f / (float)carriage_texture.Width;
 
 		generate_terrain_contour();
-		set_upplayers();
-		flatten_terrain_beneathplayers();
+		set_up_players();
+		flatten_terrain_beneath_players();
 		create_foreground();
 
-		rocket_color_grid = TextureTo2DArray(rocket_texture);
-		carriage_color_grid = TextureTo2DArray(carriage_texture);
-		cannon_color_grid = TextureTo2DArray(cannon_texture);
+		rocket_color_grid = texture_to_2D_array(rocket_texture);
+		carriage_color_grid = texture_to_2D_array(carriage_texture);
+		cannon_color_grid = texture_to_2D_array(cannon_texture);
 	}
 
-	private Color[,] TextureTo2DArray(Texture2D texture)
+	private Color[,] texture_to_2D_array(Texture2D texture)
 	{
 
 		// extract color data (pixels) from a Texture2D, to a flat array
@@ -240,7 +240,7 @@ class Main : Game
 		}
 	}
 
-	void set_upplayers()
+	void set_up_players()
 	{
 		players = new PlayerData[number_of_players];
 		for (int i = 0; i < number_of_players; i++)
@@ -281,7 +281,7 @@ class Main : Game
 		}
 	}
 
-	private void flatten_terrain_beneathplayers()
+	private void flatten_terrain_beneath_players()
 	{
 		foreach (var player in players)
 		{
@@ -297,7 +297,7 @@ class Main : Game
 
 	private void create_foreground()
 	{
-		Color[,] ground_color_grid = TextureTo2DArray(ground_texture);
+		Color[,] ground_color_grid = texture_to_2D_array(ground_texture);
 		var foreground_colors = new Color[screen_width * screen_height];
 
 		for (int x = 0; x < screen_width; x++)
@@ -320,7 +320,7 @@ class Main : Game
 
 		foreground_texture = new Texture2D(GraphicsDevice, screen_width, screen_height, false, SurfaceFormat.Color);
 		foreground_texture.SetData(foreground_colors);
-		_foregroundColorArray = TextureTo2DArray(foreground_texture);
+		_foregroundColorArray = texture_to_2D_array(foreground_texture);
 	}
 
 
@@ -357,9 +357,32 @@ class Main : Game
 		}
 
 	}
-	private Vector2 textures_collide(Color[,] tex_a, Matrix matrix_a, Color[,] tex_b, Matrix matrix_b)
+	private Vector2 textures_collide(Color[,] texture_a, Matrix transform_a, Color[,] texture_b, Matrix transform_b)
 	{
-		var matrix_a_to_b = matrix_a * Matrix.Invert(matrix_b);
+
+		// todo - pass smaller textures in rather than check every time
+		Color[,] tex_a;
+		Color[,] tex_b;
+		Matrix mat_a;
+		Matrix mat_b;
+
+		var is_smallest_a = texture_a.Length < texture_b.Length;
+		if (is_smallest_a)
+		{
+			tex_a = texture_a;
+			mat_a = transform_a;
+			tex_b = texture_b;
+			mat_b = transform_b;
+		}
+		else
+		{
+			tex_a = texture_b;
+			mat_a = transform_b;
+			tex_b = texture_a;
+			mat_b = transform_a;
+
+		}
+		var matrix_a_to_b = mat_a * Matrix.Invert(mat_b);
 		int width_a = tex_a.GetLength(0);
 		int height_a = tex_a.GetLength(1);
 		int width_b = tex_b.GetLength(0);
@@ -383,7 +406,7 @@ class Main : Game
 						{
 							if (tex_b[x_b, y_b].A > 0)
 							{
-								return Vector2.Transform(pos_a, matrix_a);
+								return Vector2.Transform(pos_a, mat_a);
 							}
 						}
 					}
@@ -443,6 +466,9 @@ class Main : Game
 
 	private void check_collisions(GameTime gameTime)
 	{
+
+		// todo : reduce collisions by checking if outlines collide
+
 		Vector2 terrain_collision_point = check_terrain_collision();
 		Vector2 player_collision_point = check_players_collision();
 		bool rocket_out_of_screen = check_out_of_screen();
