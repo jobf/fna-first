@@ -585,6 +585,9 @@ class Main : Game
 		draw_players();
 		draw_rocket();
 		draw_smoke();
+		sprite_batch.End();
+
+		sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.Additive);
 		draw_explosion();
 		sprite_batch.End();
 
