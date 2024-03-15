@@ -194,15 +194,15 @@ class Main : Game
 		}
 	}
 
-	private void AddExplosion(Vector2 explosionPos, int numberOfParticles, float size, float maxAge, GameTime gameTime)
+	private void add_explosion(Vector2 explosionPos, int numberOfParticles, float size, float maxAge, GameTime gameTime)
 	{
 		for (int i = 0; i < numberOfParticles; i++)
 		{
-			AddExplosionParticle(explosionPos, size, maxAge, gameTime);
+			add_explosion_particle(explosionPos, size, maxAge, gameTime);
 		}
 	}
 
-	private void AddExplosionParticle(Vector2 explosionPos, float explosionSize, float maxAge, GameTime gameTime)
+	private void add_explosion_particle(Vector2 explosionPos, float explosionSize, float maxAge, GameTime gameTime)
 	{
 		ParticleData particle = new ParticleData();
 
@@ -219,8 +219,8 @@ class Main : Game
 		float angle = MathHelper.ToRadians(randomizer.Next(360));
 		displacement = Vector2.Transform(displacement, Matrix.CreateRotationZ(angle));
 
-		particle.Direction = displacement;
-		particle.Acceleration = 3.0f * particle.Direction;
+		particle.Direction = displacement * 2.0f;
+		particle.Acceleration = -particle.Direction;
 		particle_list.Add(particle);
 	}
 
@@ -434,7 +434,6 @@ class Main : Game
 				Vector2 positions_from_center = particle.Position - particle.OriginalPosition;
 				float distance = positions_from_center.Length();
 				particle.Scaling = (50.0f + distance) / 200.0f;
-				// really>>>?
 				particle_list[i] = particle;
 			}
 		}
@@ -562,7 +561,7 @@ class Main : Game
 			rocket_flying = false;
 
 			smoke_list = new List<Vector2>();
-			AddExplosion(player_collision_point, 10, 80.0f, 2000.0f, gameTime);
+			add_explosion(player_collision_point, 10, 80.0f, 2000.0f, gameTime);
 			next_player();
 		}
 
@@ -571,7 +570,7 @@ class Main : Game
 			rocket_flying = false;
 
 			smoke_list = new List<Vector2>();
-			AddExplosion(terrain_collision_point, 4, 30.0f, 1000.0f, gameTime);
+			add_explosion(terrain_collision_point, 4, 30.0f, 1000.0f, gameTime);
 			next_player();
 		}
 
