@@ -16,8 +16,8 @@ static class Program
 		{
 			var graphics = new GraphicsDeviceManager(game)
 			{
-				PreferredBackBufferWidth = 500,
-				PreferredBackBufferHeight = 500,
+				PreferredBackBufferWidth = 1024,
+				PreferredBackBufferHeight = 768,
 				IsFullScreen = false
 			};
 
@@ -95,6 +95,8 @@ class Main : Game
 	private Random randomizer = new Random();
 	private int[] terrain_contour;
 	List<ParticleData> particle_list = new List<ParticleData>();
+	private const bool is_resolution_independent = true;
+	private Vector2 base_screen_size = new Vector2(800, 600);
 
 	protected override void LoadContent()
 	{
@@ -111,8 +113,17 @@ class Main : Game
 
 		sprite_batch = new SpriteBatch(GraphicsDevice);
 
-		screen_width = GraphicsDevice.PresentationParameters.BackBufferWidth;
-		screen_height = GraphicsDevice.PresentationParameters.BackBufferHeight;
+		if (is_resolution_independent)
+		{
+			screen_width = (int)base_screen_size.X;
+			screen_height = (int)base_screen_size.Y;
+		}
+		else
+		{
+			screen_width = GraphicsDevice.PresentationParameters.BackBufferWidth;
+			screen_height = GraphicsDevice.PresentationParameters.BackBufferHeight;
+		}
+
 
 
 		player_scaling = 40.0f / (float)carriage_texture.Width;
@@ -348,7 +359,7 @@ class Main : Game
 			var rot_matrix = Matrix.CreateRotationZ(rocket_angle);
 			rocket_direction = Vector2.Transform(up, rot_matrix);
 			rocket_direction *= players[current_player].Power / 50.0f;
-			
+
 			launch_missile_sound.Play();
 		}
 	}
@@ -680,16 +691,29 @@ class Main : Game
 
 	protected override void Draw(GameTime gameTime)
 	{
+		Vector3 screen_scaling_factor;
+		if (is_resolution_independent)
+		{
+			float horizontal_scaling = (float)GraphicsDevice.PresentationParameters.BackBufferWidth / base_screen_size.X;
+			float vertical_scaling = (float)GraphicsDevice.PresentationParameters.BackBufferHeight / base_screen_size.Y;
+			screen_scaling_factor = new Vector3(horizontal_scaling, vertical_scaling, 1);
+		}
+		else
+		{
+			screen_scaling_factor = new Vector3(1, 1, 1);
+		}
+		Matrix global_transformation = Matrix.CreateScale(screen_scaling_factor);
+
 		GraphicsDevice.Clear(Color.CornflowerBlue);
 
-		sprite_batch.Begin();
+		sprite_batch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, null, null, null, null, global_transformation);
 		draw_scenery();
 		draw_players();
 		draw_rocket();
 		draw_smoke();
 		sprite_batch.End();
 
-		sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.Additive);
+		sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.Additive, null, null, null, null, global_transformation);
 		draw_explosion();
 		sprite_batch.End();
 
