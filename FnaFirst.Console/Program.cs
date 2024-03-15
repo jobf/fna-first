@@ -409,8 +409,38 @@ class Main : Game
 			rocket_flying = false;
 			smoke_list = new List<Vector2>();
 		}
-
 	}
+
+	private void update_particles(GameTime gameTime)
+	{
+		float now = (float)gameTime.TotalGameTime.TotalMilliseconds;
+		for (int i = particle_list.Count - 1; i >= 0; i--)
+		{
+			ParticleData particle = particle_list[i];
+			float time_alive = now - particle.BirthTime;
+
+			if (time_alive > particle.MaxAge)
+			{
+				// particle is expired, remove it
+				particle_list.RemoveAt(i);
+			}
+			else
+			{
+				// particle is active, progress it's lifespan
+				float relative_age = time_alive / particle.MaxAge;
+				particle.Position = 0.5f * particle.Acceleration * relative_age * relative_age + particle.Direction * relative_age + particle.OriginalPosition;
+				float invAge = 1.0f - relative_age;
+				particle.ModColor = new Color(new Vector4(invAge, invAge, invAge, invAge));
+				Vector2 positions_from_center = particle.Position - particle.OriginalPosition;
+				float distance = positions_from_center.Length();
+				particle.Scaling = (50.0f + distance) / 200.0f;
+				// really>>>?
+				particle_list[i] = particle;
+			}
+		}
+	}
+
+
 	private Vector2 textures_collide(Color[,] texture_a, Matrix transform_a, Color[,] texture_b, Matrix transform_b)
 	{
 
@@ -566,12 +596,24 @@ class Main : Game
 
 	protected override void Update(GameTime gameTime)
 	{
-		process_keyboard();
+		// prevent keyboard when rocket or particles are in progress
+		// to ensure one turn has really ended before the next turn
+		if (!rocket_flying && particle_list.Count == 0)
+		{
+			process_keyboard();
+		}
+
 		if (rocket_flying)
 		{
 			update_rocket();
 			check_collisions(gameTime);
 		}
+
+		if (particle_list.Count > 0)
+		{
+			update_particles(gameTime);
+		}
+
 		base.Update(gameTime);
 	}
 
