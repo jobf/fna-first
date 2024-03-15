@@ -2,6 +2,7 @@
 using Core;
 using ImGuiNET;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Num = System.Numerics;
@@ -57,6 +58,9 @@ class Main : Game
 	private Texture2D ground_texture;
 	private Texture2D explosion_texture;
 	private SpriteBatch sprite_batch;
+	private SoundEffect hit_cannon_sound;
+	private SoundEffect hit_terrain_sound;
+	private SoundEffect launch_missile_sound;
 	private int screen_width;
 	private int screen_height;
 	private float player_scaling;
@@ -101,6 +105,9 @@ class Main : Game
 		smoke_texture = Content.Load<Texture2D>("smoke.png");
 		ground_texture = Content.Load<Texture2D>("ground");
 		explosion_texture = Content.Load<Texture2D>("explosion");
+		hit_cannon_sound = Content.Load<SoundEffect>("hitcannon");
+		hit_terrain_sound = Content.Load<SoundEffect>("hitterrain");
+		launch_missile_sound = Content.Load<SoundEffect>("launch");
 
 		sprite_batch = new SpriteBatch(GraphicsDevice);
 
@@ -341,6 +348,8 @@ class Main : Game
 			var rot_matrix = Matrix.CreateRotationZ(rocket_angle);
 			rocket_direction = Vector2.Transform(up, rot_matrix);
 			rocket_direction *= players[current_player].Power / 50.0f;
+			
+			launch_missile_sound.Play();
 		}
 	}
 
@@ -612,6 +621,7 @@ class Main : Game
 
 			smoke_list = new List<Vector2>();
 			add_explosion(player_collision_point, 10, 80.0f, 2000.0f, gameTime);
+			hit_cannon_sound.Play();
 			next_player();
 		}
 
@@ -621,6 +631,7 @@ class Main : Game
 
 			smoke_list = new List<Vector2>();
 			add_explosion(terrain_collision_point, 4, 30.0f, 1000.0f, gameTime);
+			hit_terrain_sound.Play();
 			next_player();
 		}
 
