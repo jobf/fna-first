@@ -80,6 +80,7 @@ class Main : Game
 	private Color[,] _foregroundColorArray;
 	private Color[,] carriage_color_grid;
 	private Color[,] cannon_color_grid;
+	private Color[,] explosion_color_grid;
 
 	private bool rocket_flying = false;
 	private Vector2 rocket_position;
@@ -117,6 +118,7 @@ class Main : Game
 		rocket_color_grid = texture_to_2D_array(rocket_texture);
 		carriage_color_grid = texture_to_2D_array(carriage_texture);
 		cannon_color_grid = texture_to_2D_array(cannon_texture);
+		explosion_color_grid = texture_to_2D_array(explosion_texture);
 	}
 
 	private Color[,] texture_to_2D_array(Texture2D texture)
@@ -194,11 +196,59 @@ class Main : Game
 		}
 	}
 
-	private void add_explosion(Vector2 explosionPos, int numberOfParticles, float size, float maxAge, GameTime gameTime)
+	private void add_explosion(Vector2 explosion_position, int number_of_particles, float size, float maximum_age, GameTime gameTime)
 	{
-		for (int i = 0; i < numberOfParticles; i++)
+		// make explosion particles
+		for (int i = 0; i < number_of_particles; i++)
 		{
-			add_explosion_particle(explosionPos, size, maxAge, gameTime);
+			add_explosion_particle(explosion_position, size, maximum_age, gameTime);
+		}
+
+		// determine crater
+		float rotation = (float)randomizer.Next(10);
+		Matrix matrix = Matrix.CreateTranslation(-explosion_texture.Width / 2, -explosion_texture.Height / 2, 0) *
+							Matrix.CreateRotationZ(rotation) *
+							Matrix.CreateScale(size / (float)explosion_texture.Width * 2.0f) *
+							Matrix.CreateTranslation(explosion_position.X, explosion_position.Y, 0);
+		add_crater(explosion_color_grid, matrix);
+
+		// update terrain and players now a crater was added
+		for (int i = 0; i < players.Length; i++)
+		{
+			players[i].Position.Y = terrain_contour[(int)players[i].Position.X];
+		}
+
+		flatten_terrain_beneath_players();
+		create_foreground();
+
+	}
+
+	private void add_crater(Color[,] tex, Matrix mat)
+	{
+		int width = tex.GetLength(0);
+		int height = tex.GetLength(1);
+
+		for (int x = 0; x < width; x++)
+		{
+			for (int y = 0; y < height; y++)
+			{
+				if (tex[x, y].R > 10)
+				{
+					Vector2 image_position = new Vector2(x, y);
+					Vector2 screen_position = Vector2.Transform(image_position, mat);
+
+					int screen_x = (int)screen_position.X;
+					int screen_y = (int)screen_position.Y;
+
+					if ((screen_x) > 0 && (screen_x < screen_width))
+					{
+						if (terrain_contour[screen_x] < screen_y)
+						{
+							terrain_contour[screen_x] = screen_y;
+						}
+					}
+				}
+			}
 		}
 	}
 
