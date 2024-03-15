@@ -34,6 +34,18 @@ public struct PlayerData
 	public float Power;
 }
 
+public struct ParticleData
+{
+	public float BirthTime;
+	public float MaxAge;
+	public Vector2 OriginalPosition;
+	public Vector2 Acceleration;
+	public Vector2 Direction;
+	public Vector2 Position;
+	public float Scaling;
+	public Color ModColor;
+}
+
 class Main : Game
 {
 	private Texture2D background_texture;
@@ -43,6 +55,7 @@ class Main : Game
 	private Texture2D rocket_texture;
 	private Texture2D smoke_texture;
 	private Texture2D ground_texture;
+	private Texture2D explosion_texture;
 	private SpriteBatch sprite_batch;
 	private int screen_width;
 	private int screen_height;
@@ -76,6 +89,7 @@ class Main : Game
 	private List<Vector2> smoke_list = new List<Vector2>();
 	private Random randomizer = new Random();
 	private int[] terrain_contour;
+	List<ParticleData> particle_list = new List<ParticleData>();
 
 	protected override void LoadContent()
 	{
@@ -85,6 +99,7 @@ class Main : Game
 		rocket_texture = Content.Load<Texture2D>("rocket.png");
 		smoke_texture = Content.Load<Texture2D>("smoke.png");
 		ground_texture = Content.Load<Texture2D>("ground");
+		explosion_texture = Content.Load<Texture2D>("explosion");
 
 		sprite_batch = new SpriteBatch(GraphicsDevice);
 
@@ -170,6 +185,45 @@ class Main : Game
 			sprite_batch.Draw(smoke_texture, smoke_list[i], null, Color.White, 0, new Vector2(40, 35), 0.2f, SpriteEffects.None, 1);
 		}
 	}
+	private void draw_explosion()
+	{
+		for (int i = 0; i < particle_list.Count; i++)
+		{
+			ParticleData particle = particle_list[i];
+			sprite_batch.Draw(explosion_texture, particle.Position, null, particle.ModColor, i, new Vector2(256, 256), particle.Scaling, SpriteEffects.None, 1);
+		}
+	}
+
+	private void AddExplosion(Vector2 explosionPos, int numberOfParticles, float size, float maxAge, GameTime gameTime)
+	{
+		for (int i = 0; i < numberOfParticles; i++)
+		{
+			AddExplosionParticle(explosionPos, size, maxAge, gameTime);
+		}
+	}
+
+	private void AddExplosionParticle(Vector2 explosionPos, float explosionSize, float maxAge, GameTime gameTime)
+	{
+		ParticleData particle = new ParticleData();
+
+		particle.OriginalPosition = explosionPos;
+		particle.Position = particle.OriginalPosition;
+
+		particle.BirthTime = (float)gameTime.TotalGameTime.TotalMilliseconds;
+		particle.MaxAge = maxAge;
+		particle.Scaling = 0.25f;
+		particle.ModColor = Color.White;
+
+		float particleDistance = (float)randomizer.NextDouble() * explosionSize;
+		Vector2 displacement = new Vector2(particleDistance, 0);
+		float angle = MathHelper.ToRadians(randomizer.Next(360));
+		displacement = Vector2.Transform(displacement, Matrix.CreateRotationZ(angle));
+
+		particle.Direction = displacement;
+		particle.Acceleration = 3.0f * particle.Direction;
+		particle_list.Add(particle);
+	}
+
 	void process_keyboard()
 	{
 		KeyboardState keybState = Keyboard.GetState();
@@ -478,6 +532,7 @@ class Main : Game
 			rocket_flying = false;
 
 			smoke_list = new List<Vector2>();
+			AddExplosion(player_collision_point, 10, 80.0f, 2000.0f, gameTime);
 			next_player();
 		}
 
@@ -486,6 +541,7 @@ class Main : Game
 			rocket_flying = false;
 
 			smoke_list = new List<Vector2>();
+			AddExplosion(terrain_collision_point, 4, 30.0f, 1000.0f, gameTime);
 			next_player();
 		}
 
@@ -529,6 +585,7 @@ class Main : Game
 		draw_players();
 		draw_rocket();
 		draw_smoke();
+		draw_explosion();
 		sprite_batch.End();
 
 		base.Draw(gameTime);
